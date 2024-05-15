@@ -1,7 +1,7 @@
 <script lang="ts">
     import ArrowLeft from "svelte-material-icons/ArrowLeft.svelte";
     import LoadingIcon from "svelte-material-icons/Loading.svelte";
-    import { db, focusedClass, home, listMode, setDB } from "../mainStore";
+    import { db, focusedClass, home, listMode, setDB, decompressZSTD } from "../mainStore";
     import Class from "./Class/Class.svelte";
     import Scheduler from "./Scheduler/Scheduler.svelte";
     import { openDB } from "idb";
@@ -19,7 +19,7 @@
         loading = true;
         let TERM = $db?.term;
 
-        let resp = await fetch(`./db/${TERM}.yaucsccs`);
+        let resp = await fetch(`./db/${TERM}.yaucsccs.zstd`);
 
         if (!resp.ok) {
             loading = false;
@@ -32,7 +32,7 @@
             },
         });
 
-        let arrayBuffer = await resp.arrayBuffer();
+        let arrayBuffer = await decompressZSTD(await resp.arrayBuffer());
         
         // save to db
         await localDB.put("db", arrayBuffer, TERM)
@@ -58,7 +58,7 @@
         Need more help? <a href="https://github.com/cabalex/slugschedule/wiki/Usage-Guide" target="_blank" rel="noopener noreferrer">See the Usage Guide</a>.<br />
 
         <h2>Home</h2>
-        For accurate walking estimates, I live at <select bind:value={$home}>
+        For accurate walking estimates, I live at <select aria-label="Home location" bind:value={$home}>
             <option value="">Off campus</option>
             <option>Cowell College</option>
             <option>Stevenson College</option>
